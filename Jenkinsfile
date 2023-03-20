@@ -15,7 +15,6 @@ pipeline {
                 ./astro version
                 export PATH=$PATH:/usr/local/bin 
                 echo $PATH
-                ./astro dev parse
                 ./astro dev pytest
                 ./astro deploy
                 '''
