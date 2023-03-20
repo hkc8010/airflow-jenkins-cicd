@@ -10,8 +10,8 @@ pipeline {
             steps {
                 checkout scm
                 sh '''
-                curl -LJO https://github.com/astronomer/astro-cli/releases/download/v1.11.0/astro_1.11.0_linux_amd64.tar.gz
-                tar -zxvf astro_1.11.0_linux_amd64.tar.gz astro && rm astro_1.11.0_linux_amd64.tar.gz
+                curl -LJO https://github.com/astronomer/astro-cli/releases/download/v1.11.0/astro_1.11.0_darwin_arm64.tar.gz
+                tar -zxvf astro_1.11.0_darwin_arm64.tar.gz astro && rm astro_1.11.0_darwin_arm64.tar.gz
                 ./astro deploy
                 '''
             }
