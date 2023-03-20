@@ -1,0 +1,41 @@
+DEFAULT:
+  dag:
+    start_date: 2022, 7, 14, 10
+    schedule_interval: '15,45 * * * *'  
+
+  sources:
+    s3:
+      bucket: internal-payments-recon
+      prefixes: 
+        - internal-payment-recon-new/axis
+        - internal-payment-recon-new/mint_axis_cred_mis
+        - internal-payment-recon-new/rent_axisupi
+      xcom_file_search_expr: '^internal-payment-recon-new/{table}\^\^\^.*\.csv$'   # for xcom file list in case of is_s3_list_once_per_dag is True
+
+  targets:
+    redshift:
+      dest_schema: payments_recon
+      dest_table: '{table}__v2'
+      copy_options: 
+        - format as csv
+        - ignoreheader as 1
+        - acceptanydate dateformat 'auto'
+        - acceptinvchars
+        - compupdate off 
+        - statupdate off
+        - fillrecord
+
+    databricks:
+      dest_schema: payments_recon
+      dest_table: '{table}'
+      copy_options: 
+        file_format: CSV
+        pattern: 
+        format_options:
+          header: 'true'
+          delimiter: ','
+          quote: '"'
+          escape: '"'
+        copy_options:
+          force: 'true'
+          # mergeSchema: 'true'  

@@ -1,0 +1,54 @@
+DEFAULT:
+  targets:
+    redshift:    
+      transformed_columns: 
+        rrn: rrn
+        txnid: txnid
+        orderid: orderid
+        amount: amount
+        mobile_no: mobile_no
+        bankname: bankname
+        maskedaccountnumber: maskedaccountnumber
+        ifsc: ifsc
+        vpa: vpa
+        account_cust_name: account_cust_name
+        respcode: respcode
+        response: response
+        txn_date: txn_date
+        creditvpa: creditvpa
+        remarks: remarks
+        surcharge: surcharge
+        tax: tax
+        debit_amount: debit_amount
+        mdr_tax: mdr_tax
+        merchant_id: merchant_id
+        unq_cust_id: unq_cust_id
+        etl__file_name: etl__file_name
+        etl__load_time: GETDATE()
+
+    databricks:
+      create_dag: True
+      transformed_columns: 
+        rrn: "`RRN`::LONG"
+        txnid: "`TXNID`"
+        orderid: "`ORDERID`"
+        amount: "`AMOUNT`::DOUBLE"
+        mobile_no: "`MOBILE_NO`::LONG"
+        bankname: "`BANKNAME`"
+        maskedaccountnumber: "`MASKEDACCOUNTNUMBER`"
+        ifsc: "`IFSC `"
+        vpa: "`VPA`"
+        account_cust_name: "`ACCOUNT_CUST_NAME`"
+        respcode: "`RESPCODE`"
+        response: "`RESPONSE`"
+        txn_date: "`TXN_DATE`::TIMESTAMP"
+        creditvpa: "`CREDITVPA`"
+        remarks: "`REMARKS`"
+        surcharge: "`SURCHARGE`::DOUBLE"
+        tax: "`TAX`::DOUBLE"
+        debit_amount: "`DEBIT_AMOUNT`::DOUBLE"
+        mdr_tax: "`MDR_TAX`::DOUBLE"
+        merchant_id: "`MERCHANT_ID`"
+        unq_cust_id: "`UNQ_CUST_ID`"
+        etl__file_name: input_file_name()
+        etl__load_time: current_timestamp()

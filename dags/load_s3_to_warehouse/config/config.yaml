@@ -1,0 +1,158 @@
+DEFAULT:
+  dag:
+    dag_id: '{data_source}__s3_to_{target}'
+    description: 'DAG to load files from {data_source} S3 to {target} table: {table}'
+    start_date: 2022, 7, 14, 10
+    schedule_interval: '15,45 * * * *'  
+    catchup: True
+    max_active_runs: 1
+    tags: 
+      - load_s3_to_warehouse
+      - '{data_source}'
+      - '{target}'
+
+  default_args:
+    owner: suraj.dhondale@cred.club
+    pool: load_s3_to_warehouse
+    depends_on_past: True
+    retries: 3
+    retry_delay_sec: 300
+    retry_exponential_backoff: True        
+    on_retry_slack_alert: True
+    on_failure_slack_alert: True
+
+  connections:
+    slack_conn_id: slack-alerts
+    slack_conn_id_success: slack-alerts-success
+    slack_conn_id_failure: slack-alerts-failure
+    pager_conn_id: de_pager_duty
+
+  sensor_args:
+    poke_interval: 600  # 10 mins
+    timeout: 7200       # 2 hours
+    soft_fail: False
+    mode: poke  
+
+  create_start_end_dummy_task: False  # Useful when dag_id is same for multiple tables
+  is_s3_list_once_per_dag: True      # Useful when dag_id is same for multiple tables and want to filter on s3 files only once
+  task_id_prefix: '{table}__'         # Useful when dag_id is same for multiple tables      
+  is_send_slack_success_alerts: True
+  is_send_slack_failure_alerts: True
+
+  sources:
+    default:
+      bucket: internal-payments-recon
+      prefixes: 
+        - payments_recon/processed/{data_source}/
+      skip_run_delay_iso_duration:    #ISO 8601 duration format
+
+    s3:
+      aws_conn_id: s3
+      jsonpaths_bucket: 
+      jsonpaths_prefix: 
+      jsonpaths_file: 
+      manifest_bucket: internal-payments-recon
+      manifest_prefix: payments_recon/etl/manifest/{table}_{{{{ts_nodash}}}}.manifest
+      search_expr: '.*\.csv$'             # for s3 files
+      xcom_file_search_expr: '^payments_recon/processed/{data_source}/{table}/.*\.csv$'   # for xcom file list in case of is_s3_list_once_per_dag is True
+      table_template_replace_with_dashes: False
+
+
+  targets:
+    default:
+      etl_sql_path: 'sql/etl.sql'
+      etl_ddl_sql_path: 'sql/ddl/tables/{dest_schema}/{dest_table}.sql'
+      etl_staging_ddl_sql_path: 'sql/ddl/tables/{staging_schema}/{staging_table}.sql'
+      dest_schema: '{data_source}'
+      dest_table: '{table}__v2'
+      staging_schema: payments_recon_staging
+      staging_table: stg__{table}
+      skip_delete_dest_table:
+      delsert_column: etl__file_name
+      delsert_filter: etl__load_time > CURRENT_DATE - 7
+      delete_staging_sequence_column:
+      upsert_id_columns:
+      dedupe_order_by_columns:
+      partition_column:
+      transformed_columns:  
+      additional_filter:
+
+    redshift:
+      create_dag_class_name: LoadS3ToRedshift
+      create_dag: True
+      source: s3
+      redshift_conn_id: redshift_s3_to_warehouse_etl
+      copy_options:
+      continue_copy_on_error: True
+      update_file_name_column: etl__file_name
+      analyze_table: True
+
+    databricks:
+      etl_ddl_sql_path: 'sql/databricks/ddl/tables/{dest_schema}/{dest_table}.sql'
+      etl_staging_ddl_sql_path: 'sql/databricks/ddl/tables/{staging_schema}/{staging_table}.sql'      
+      create_dag_class_name: LoadS3ToDatabricks
+      create_dag: False
+      source: s3
+      databricks_sql_conn_id: databricks_sql
+      copy_options:
+      continue_copy_on_error: True
+  
+  data_sources:
+    - axis
+    - cashfree
+    - cf
+    - cointab
+    - cybersource
+    - hdfc
+    - icici
+    - idfc
+    - juspay
+    - kotak
+    - ksf    
+    - liquiloans
+    - payments_recon
+    - payu
+    - razorpay
+    - rbl
+    - tpsl
+    - yesbank
+    - yesbank__v3
+    - icici__v3
+    - razorpay__v3
+    - liquiloans__v3
+    - cointab__v3
+    - rbl__v3
+    - m2p__v3
+    - yesbankPaytech
+    - yesbank_current__v3
+    - rent
+    - payu_bbps__v3
+    - credpay_axis__v3
+    - rent_lending_cointab__v3
+    - icici_refund__v3
+    - axis_refunds__v3
+    - rbl__v4
+    - axis_refunds_01__v3
+    - yesbank_current__v4
+    - axisupi_settlement__v3
+    - mint_ll_withdrawal_mis__v3
+    - tpsl__v3
+    - bbps_cybersource
+    - rent_axisupi__v3
+    - bbps_cybersource_sale
+    - alok_shipments
+    - rp_manual_upload
+    - hdfc__v3
+    - store_drop_ship_comms
+    - kotak_mastersend__v2
+    - ksf_cancellation__v2
+    - rbl_visa__v4
+    - bbps_pinelabs__v2
+    - pinelabs__v2
+    - dag_test_axis
+    - icici_statement_4308
+    - rbl_core
+    - pickrr_zones
+    - proforma_invoice_s3
+    - checkout_sale
+    - checkout_refund
