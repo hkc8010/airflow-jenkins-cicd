@@ -21,8 +21,10 @@ pipeline {
         stage("Test") {
             steps {
                 sh '''
-                    ./astro dev parse
-                    ./astro dev pytest
+                export PATH=$PATH:/usr/local/bin 
+                echo $PATH
+                ./astro dev parse
+                ./astro dev pytest
                 '''
             }
         }
