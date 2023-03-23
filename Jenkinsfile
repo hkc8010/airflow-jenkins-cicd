@@ -17,6 +17,7 @@ pipeline {
                 echo $PATH
                 '''
             }
+        }
         stage("Test") {
             steps {
                 sh '''
@@ -26,7 +27,7 @@ pipeline {
             }
         }
         }
-    }
+
     post {
         always {
             cleanWs()
