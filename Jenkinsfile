@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages {
-        stage('Deploy to Astronomer') {
+        stage('Install astro cli') {
             when {
                 expression {
                     return env.GIT_BRANCH == "origin/main"
@@ -15,10 +15,16 @@ pipeline {
                 ./astro version
                 export PATH=$PATH:/usr/local/bin 
                 echo $PATH
-                ./astro dev pytest
-                ./astro deploy
                 '''
             }
+        stage("Test") {
+            steps {
+                sh '''
+                    ./astro dev parse
+                    ./astro dev pytest
+                '''
+            }
+        }
         }
     }
     post {
