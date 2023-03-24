@@ -23,6 +23,7 @@ pipeline {
                 sh '''
                 export PATH=$PATH:/usr/local/bin 
                 echo $PATH
+                ls -altrh
                 ./astro dev parse
                 ./astro dev pytest
                 '''
